@@ -3,6 +3,8 @@ package main
 import (
 	test "example/basic"
 	// encode "example/encode"
+	db "example/db"
+	util "example/util"
 	"fmt"
 	"time"
 
@@ -13,7 +15,8 @@ import (
 func main() {
 	startTime := time.Now()
 	fmt.Println("main")
-
+	util.LoadEnv()
+	db.ConnectDb()
 	/* ######### test basic code  ######### */
 	// test.MainTest()
 
@@ -42,7 +45,7 @@ func initRouter() {
 	// - Preflight requests cached for 20 min
 	r.Use(cors.New(cors.Config{
 		AllowAllOrigins:  true,
-		AllowMethods:     []string{"PUT", "PATCH"},
+		AllowMethods:     []string{"GET", "POST"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
 		AllowCredentials: false,
 		MaxAge:           10 * time.Minute,
@@ -71,9 +74,11 @@ func initRouter() {
 		mainApi := v1.Group("/main")
 		mainApi.Use(AuthRequired)
 		{
+			mainApi.GET("/db", test.GetDataDbMongo)
 			mainApi.GET("/test", test.MainTestGetApi)
 			mainApi.GET("/test/:id", test.MainTestGetApiID)
 			mainApi.POST("/test", test.MainTestPostApi)
+			mainApi.GET("/excel", test.Excel)
 		}
 	}
 
