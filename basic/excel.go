@@ -1,18 +1,88 @@
 package test
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
 )
 
 func Excel(c *gin.Context) {
+	startTime := time.Now()
 	fmt.Println("8888888888888888")
-
-	createExcel()
-	readExcel()
+	uploadExcel(c)
+	// createExcel()
+	// readExcel()
 	// importExcel()
+	endTime := time.Since(startTime)
+	fmt.Printf("\n excel time : %g", endTime.Seconds())
+	fmt.Println("\n end uplaod excel")
+}
+
+func uploadExcel(c *gin.Context) {
+	// form, _ := c.MultipartForm()
+	// files := form.File["file"]
+
+	// for _, file := range files {
+	// 	fmt.Println(file.Filename)
+
+	// }
+
+	file, _, err := c.Request.FormFile("file")
+	defer file.Close()
+	if err != nil {
+		return
+	}
+
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, file); err != nil {
+		return
+	}
+
+	f, err := excelize.OpenReader(buf)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer func() {
+		// Close the spreadsheet.
+		if err := f.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	f1 := excelize.NewFile()
+	index := f1.NewSheet("Sheet2")
+	for i, row := range rows {
+
+		for j, colCell := range row {
+			// if i == len(row) {
+			// 	fmt.Println(colCell, "\t")
+			if j == 0 {
+				f1.SetCellValue("Sheet2", "A"+strconv.Itoa(i), colCell)
+			} else {
+				f1.SetCellValue("Sheet2", "B"+strconv.Itoa(i), colCell)
+			}
+
+			// }
+
+		}
+		// fmt.Println()
+	}
+	f1.SetActiveSheet(index)
+	if err := f1.SaveAs("Book3.xlsx"); err != nil {
+		fmt.Println(err)
+	}
 }
 
 func createExcel() {
@@ -69,5 +139,11 @@ func readExcel() {
 }
 
 func importExcel() {
-
+	for i := 0; i < 103589; i++ {
+		for j := 0; j < 1; j++ {
+			if i == 103588 {
+				fmt.Println("===============")
+			}
+		}
+	}
 }

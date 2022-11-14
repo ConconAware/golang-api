@@ -79,6 +79,7 @@ func initRouter() {
 			mainApi.GET("/test/:id", test.MainTestGetApiID)
 			mainApi.POST("/test", test.MainTestPostApi)
 			mainApi.GET("/excel", test.Excel)
+			mainApi.POST("/excel", test.Excel)
 		}
 	}
 
