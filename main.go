@@ -3,7 +3,7 @@ package main
 import (
 	test "example/basic"
 	// encode "example/encode"
-	db "example/db"
+
 	util "example/util"
 	"fmt"
 	"time"
@@ -16,7 +16,8 @@ func main() {
 	startTime := time.Now()
 	fmt.Println("main")
 	util.LoadEnv()
-	db.ConnectDb()
+	// db.ConnectDb()
+
 	/* ######### test basic code  ######### */
 	// test.MainTest()
 

@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 func MainTest() {
@@ -43,8 +44,9 @@ func MainTest() {
 }
 
 type Test struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	Id    int64  `json:"id"`
+	Name  string `json:"name" validate:"required,min=0,max=5"`
+	Email string `json:"email" validate:"required,email,min=6,max=32"`
 }
 
 func MainTestGetApi(c *gin.Context) {
@@ -78,11 +80,17 @@ func MainTestGetApiID(c *gin.Context) {
 
 func MainTestPostApi(c *gin.Context) {
 	var body Test
-
+	// vTest := new(Test)
 	// Call BindJSON to bind the received JSON to
 	if err := c.BindJSON(&body); err != nil {
 		return
 	}
+
+	// errors := ValidateStruct(body)
+	// if errors != nil {
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, errors)
+	// 	return
+	// }
 
 	test := []Test{
 		{Id: 1, Name: "Test1"},
@@ -94,4 +102,27 @@ func MainTestPostApi(c *gin.Context) {
 	fmt.Println(test)
 	c.IndentedJSON(http.StatusOK, test)
 
+}
+
+type ErrorResponse struct {
+	FailedField string
+	Tag         string
+	Value       string
+}
+
+var validate = validator.New()
+
+func ValidateStruct(test Test) []*ErrorResponse {
+	var errors []*ErrorResponse
+	err := validate.Struct(test)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
 }

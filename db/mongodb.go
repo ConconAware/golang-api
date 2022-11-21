@@ -18,6 +18,7 @@ func ConnectDb() *mongo.Database {
 	fmt.Println(uri)
 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
+		util.New(err.Error())
 		log.Fatal(err)
 	}
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)

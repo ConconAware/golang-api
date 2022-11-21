@@ -1,6 +1,8 @@
 package util
 
 import (
+	"fmt"
+
 	"github.com/joho/godotenv"
 
 	"log"
@@ -16,4 +18,21 @@ func LoadEnv() {
 
 func GetEnv(name string) string {
 	return os.Getenv(name)
+}
+
+type error interface {
+	Error() string
+}
+
+type errorString struct {
+	Message string
+}
+
+func (e *errorString) Error() string {
+	return e.Message
+}
+
+func New(text string) error {
+	fmt.Println("Error :", text)
+	return &errorString{text}
 }
