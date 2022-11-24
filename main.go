@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
@@ -23,15 +24,16 @@ func main() {
 
 	/* ######### test encode ######### */
 	// encode.MainEncode()
-	initRouter()
+	initRouterGin()
+	// initRouterFiber()
 	endTime := time.Since(startTime)
 	fmt.Printf("\n time : %g", endTime.Seconds())
 }
 
-func initRouter() {
+func initRouterGin() {
 	r := gin.New()
 	// Set a lower memory limit for multipart forms (default is 32 MiB)
-	r.MaxMultipartMemory = 1
+	r.MaxMultipartMemory = 8
 
 	// Global middleware
 	// Logger middleware will write the logs to gin.DefaultWriter even if you set with GIN_MODE=release.
@@ -89,6 +91,26 @@ func initRouter() {
 	// r.POST("/test", test.MainTestPostApi)
 
 	r.Run(":8080")
+}
+
+func initRouterFiber() {
+	app := fiber.New()
+
+	if !fiber.IsChild() {
+		fmt.Println("I'm the parent process")
+	} else {
+		fmt.Println("I'm a child process")
+	}
+
+	v1 := app.Group("/api/v1")
+	{
+		mainApi := v1.Group("/main")
+		{
+			mainApi.Get("/test", test.FiberMainTestGetApi)
+		}
+	}
+
+	app.Listen(":8080")
 }
 
 func AuthRequired(c *gin.Context) {

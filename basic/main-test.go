@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 func MainTest() {
@@ -54,10 +55,26 @@ func MainTestGetApi(c *gin.Context) {
 		{Id: 1, Name: "Test1"},
 		{Id: 2, Name: "Test2"},
 	}
+	for i := 0; i < 100000; i++ {
+		test = append(test, Test{Id: int64(i), Name: "Test1"})
+	}
 
-	fmt.Println(test)
-	c.IndentedJSON(http.StatusOK, test)
+	c.AbortWithStatusJSON(http.StatusOK, test)
+	// c.IndentedJSON(http.StatusOK, test)
 
+}
+
+func FiberMainTestGetApi(c *fiber.Ctx) error {
+	test := []Test{
+		{Id: 1, Name: "Test1"},
+		{Id: 2, Name: "Test2"},
+	}
+
+	for i := 0; i < 100000; i++ {
+		test = append(test, Test{Id: int64(i), Name: "Test1"})
+		// fmt.Println(test)
+	}
+	return c.Status(http.StatusOK).JSON(test)
 }
 
 func MainTestGetApiID(c *gin.Context) {
@@ -86,11 +103,11 @@ func MainTestPostApi(c *gin.Context) {
 		return
 	}
 
-	// errors := ValidateStruct(body)
-	// if errors != nil {
-	// 	c.AbortWithStatusJSON(http.StatusBadRequest, errors)
-	// 	return
-	// }
+	errors := ValidateStruct(body)
+	if errors != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, errors)
+		return
+	}
 
 	test := []Test{
 		{Id: 1, Name: "Test1"},
